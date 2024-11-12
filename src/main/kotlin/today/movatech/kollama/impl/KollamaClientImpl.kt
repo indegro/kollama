@@ -14,7 +14,7 @@ import today.movatech.today.movatech.kollama.impl.decodeFromString
 import today.movatech.today.movatech.kollama.impl.json
 
 class KollamaClientImpl(
-    private val ollamaClientConfig: KOllamaClientConfig = KOllamaClientConfig.Builder().build(),
+    private val kollamaClientConfig: KollamaClientConfig = KollamaClientConfig.Builder().build(),
     engine: HttpClientEngine
 ) : KollamaClient {
     private val logger = LoggerFactory.getLogger(KollamaClient::class.java)
@@ -22,7 +22,7 @@ class KollamaClientImpl(
     private val client = HttpClient(engine)
 
     override suspend fun tags(): Models {
-        val endpoint = ollamaClientConfig.kollamaEndpointProvider.listModelsEndpoint()
+        val endpoint = kollamaClientConfig.kollamaEndpointProvider.listModelsEndpoint()
         logger.info("Requesting list of models from $endpoint")
 
         return try {
@@ -37,21 +37,13 @@ class KollamaClientImpl(
     }
 
     override suspend fun generate(generateRequest: GenerateRequest): GenerateResponse {
-        val model = generateRequest.model
-        val prompt = generateRequest.prompt ?: ""
-        val endpoint = ollamaClientConfig.kollamaEndpointProvider.generateResponseEndpoint()
+        val endpoint = kollamaClientConfig.kollamaEndpointProvider.generateResponseEndpoint()
 
-        logger.info("Generating completion from $endpoint with model $model")
+        logger.info("Generating completion from $endpoint with model ${generateRequest.model}")
 
         val response: HttpResponse = client.post(endpoint) {
             contentType(ContentType.Application.Json)
-            setBody(
-                json.encodeToString(
-                    CompletionRequest(
-                        model, prompt, system = ""
-                    )
-                )
-            )
+            setBody(json.encodeToString(generateRequest))
         }
 
         return processGenerateResponse(response)
@@ -75,7 +67,9 @@ class KollamaClientImpl(
             }.collect { line -> append(line) }
         }
 
-        return generateRawResponse.decodeFromString<GenerateResponse>().getOrThrow()
+        return generateRawResponse
+            .decodeFromString<GenerateResponse>()
+            .getOrThrow()
             ?: throw EmptyGenerateResponseException()
     }
 
@@ -91,6 +85,9 @@ class KollamaClientImpl(
             }.collect { line -> append(line) }
         }
 
-        return modelsRawResponse.decodeFromString<Models>().getOrThrow() ?: Models(emptyList())
+        return modelsRawResponse
+            .decodeFromString<Models>()
+            .getOrThrow()
+            ?: Models(emptyList())
     }
 }

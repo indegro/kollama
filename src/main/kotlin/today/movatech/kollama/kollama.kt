@@ -1,8 +1,8 @@
 package today.movatech.kollama
 
-import today.movatech.kollama.impl.DefaultKOllamaUrlProvider
+import today.movatech.kollama.impl.DefaultKollamaUrlProvider
 
-interface KOllamaEndpointProvider {
+interface KollamaEndpointProvider {
     fun listModelsEndpoint(): String
     fun generateResponseEndpoint(): String
 }
@@ -16,15 +16,15 @@ interface KollamaClient {
     fun shutdown()
 }
 
-class KOllamaClientConfig private constructor(
-    val kollamaEndpointProvider: KOllamaEndpointProvider,
+class KollamaClientConfig private constructor(
+    val kollamaEndpointProvider: KollamaEndpointProvider,
 ) {
     data class Builder(
-        var kollamaEndpointProvider: KOllamaEndpointProvider = DefaultKOllamaUrlProvider(),
+        var kollamaEndpointProvider: KollamaEndpointProvider = DefaultKollamaUrlProvider(),
         val reqTimeout: Long = 30_000L,
         val defaultModel: CodeModel? = null,
     ) {
-        fun build(): KOllamaClientConfig = KOllamaClientConfig(kollamaEndpointProvider)
+        fun build(): KollamaClientConfig = KollamaClientConfig(kollamaEndpointProvider)
     }
 }
 

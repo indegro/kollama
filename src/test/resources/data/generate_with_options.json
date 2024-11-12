@@ -1,0 +1,14 @@
+{
+  "model": "codellama:code",
+  "created_at": "2024-07-22T20:47:51.147561Z",
+  "response": "generate_with_options",
+  "done": true,
+  "done_reason": "stop",
+  "context": [],
+  "total_duration": 1162761250,
+  "load_duration": 6683708,
+  "prompt_eval_count": 17,
+  "prompt_eval_duration": 201222000,
+  "eval_count": 63,
+  "eval_duration": 953997000
+}
