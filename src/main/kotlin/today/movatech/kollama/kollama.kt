@@ -1,11 +1,12 @@
 package today.movatech.kollama
 
-import today.movatech.kollama.impl.DefaultKollamaUrlProvider
-
-interface KollamaEndpointProvider {
-    fun listModelsEndpoint(): String
-    fun generateResponseEndpoint(): String
-}
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import org.slf4j.LoggerFactory
 
 interface KollamaClient {
 
@@ -13,18 +14,76 @@ interface KollamaClient {
 
     suspend fun generate(generateRequest: GenerateRequest): GenerateResponse
 
+    suspend fun chat(chatRequest: ChatRequest): ChatResponse
+
     fun shutdown()
 }
 
 class KollamaClientConfig private constructor(
-    val kollamaEndpointProvider: KollamaEndpointProvider,
+    val protocol: String,
+    val host: String,
+    val port: Int,
 ) {
-    data class Builder(
-        var kollamaEndpointProvider: KollamaEndpointProvider = DefaultKollamaUrlProvider(),
-        val reqTimeout: Long = 30_000L,
-        val defaultModel: CodeModel? = null,
-    ) {
-        fun build(): KollamaClientConfig = KollamaClientConfig(kollamaEndpointProvider)
+    class Builder {
+        private var protocol: String = "http"
+        private var host: String = "localhost"
+        private var port: Int = 11434
+
+        fun protocol(protocol: String) = apply { this.protocol = protocol }
+        fun host(host: String) = apply { this.host = host }
+        fun port(port: Int) = apply { this.port = port }
+
+        fun build(): KollamaClientConfig {
+            return KollamaClientConfig(protocol, host, port)
+        }
+    }
+}
+
+
+class KollamaClientImpl(
+    kollamaClientConfig: KollamaClientConfig = KollamaClientConfig.Builder().build(),
+    engine: HttpClientEngine
+) : KollamaClient {
+    private val logger = LoggerFactory.getLogger(KollamaClient::class.java)
+    private val client = HttpClient(engine)
+    private val ollamaBaseEndpoint =
+        "${kollamaClientConfig.protocol}://${kollamaClientConfig.host}:${kollamaClientConfig.port}/api"
+
+    override suspend fun tags(): Models {
+        val response: HttpResponse = client.get("$ollamaBaseEndpoint/tags") {
+            contentType(ContentType.Application.Json)
+        }
+        return processResponse(response)
+    }
+
+    override suspend fun generate(generateRequest: GenerateRequest): GenerateResponse {
+        val response = sendRequestWithBody("$ollamaBaseEndpoint/generate", generateRequest)
+        return processResponse(response)
+    }
+
+    override suspend fun chat(chatRequest: ChatRequest): ChatResponse {
+        val response = sendRequestWithBody("$ollamaBaseEndpoint/chat", chatRequest)
+        return processResponse(response)
+    }
+
+    override fun shutdown() {
+        client.close()
+        logger.info("HTTP client closed.")
+    }
+
+    private suspend inline fun <reified T> sendRequestWithBody(endpoint: String, body: T): HttpResponse =
+        client.post(endpoint) {
+            contentType(ContentType.Application.Json)
+
+            if (body != null) {
+                setBody(body.encodeToString())
+            }
+        }
+
+    private suspend inline fun <reified T : Any> processResponse(response: HttpResponse): T {
+        return response.body<String>()
+            .decodeFromString<T>()
+            .getOrThrow()
     }
 }
 

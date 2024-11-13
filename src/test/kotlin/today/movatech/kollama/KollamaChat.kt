@@ -8,40 +8,36 @@ import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class GenerateRequest_Options_Test : KollamaTest() {
+class KollamaChat : KollamaTest() {
 
     @Test
-    fun test_generate_response_non_stream() {
+    fun test_chat_non_stream() {
         runBlocking {
             val mockEngine = MockEngine { request ->
-                require(request.url.encodedPath == "/api/generate")
+                require(request.url.encodedPath == "/api/chat")
                 require(request.method.value == "POST")
                 require(request.body is TextContent)
 
-                val generateRequest = json.decodeFromString<GenerateRequest>((request.body as TextContent).text)
-                val options = generateRequest.options ?: throw IllegalArgumentException("Options is not set")
-                require(options.temperature == 0.1.toFloat())
-
                 respond(
-                    content = ByteReadChannel(readResponse("data/generate_with_options.json")),
+                    content = ByteReadChannel(readResponse("data/chat.json")),
                     status = HttpStatusCode.OK,
                     headers = headersOf(HttpHeaders.ContentType, "application/json")
                 )
             }
-
             val kollamaClient = KollamaClientImpl(
                 engine = mockEngine
             )
 
-            val generateRequest = GenerateRequest(
+            val chatRequest = ChatRequest(
                 model = CODE_GEMMA_2B.modelName,
-                prompt = "Why is the sky blue?",
-                stream = false,
-                options = Options(temperature = 0.1F)
+                messages = listOf(
+                    Message("user", content = "why is the sky blue?")
+                ),
+                stream = false
             )
             assertEquals(
-                "generate_with_options",
-                kollamaClient.generate(generateRequest).response
+                "Hello! How are you today?",
+                kollamaClient.chat(chatRequest).message.content
             )
         }
     }

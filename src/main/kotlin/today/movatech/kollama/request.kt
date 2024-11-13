@@ -1,61 +1,23 @@
 package today.movatech.kollama
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
-
-@Suppress("PROVIDED_RUNTIME_TOO_LOW")
-@Serializable
-data class CompletionRequest(
-    val model: String,
-    val prompt: String,
-    val system: String
-)
 
 @Serializable
 @OptIn(ExperimentalSerializationApi::class)
 data class GenerateRequest(
     @JsonNames("model") val model: String,
-    @JsonNames("prompt") val prompt: String? = null,
+    @JsonNames("prompt") val prompt: String,
     @JsonNames("suffix") val suffix: String? = null,
-    @JsonNames("format") val format: String = "json",
+    @JsonNames("format") val format: String? = null,
     @JsonNames("options") val options: Options? = null,
     @JsonNames("system") val system: String? = null,
     @JsonNames("template") val template: String? = null,
-    @JsonNames("stream") val stream: Boolean = false,
-    @JsonNames("raw") val raw: Boolean = false,
-    @JsonNames("keep_alive") val keepAlive: String? = "5m",
-)
-
-@Suppress("PROVIDED_RUNTIME_TOO_LOW")
-@Serializable
-data class Models(
-    val models: List<Model>
-)
-
-@Suppress("PROVIDED_RUNTIME_TOO_LOW")
-@Serializable
-@OptIn(ExperimentalSerializationApi::class)
-data class Model(
-    val name: String,
-    @JsonNames("modified_at")
-    val modifiedAt: String,
-    val size: Long,
-    val digest: String,
-    val details: ModelDetail
-)
-
-@Suppress("PROVIDED_RUNTIME_TOO_LOW")
-@Serializable
-@OptIn(ExperimentalSerializationApi::class)
-data class ModelDetail(
-    val format: String,
-    val family: String,
-    val families: List<String>? = emptyList(),
-    @JsonNames("parameter_size")
-    val parameterSize: String,
-    @JsonNames("quantization_level")
-    val quantizationLevel: String
+    @JsonNames("stream") val stream: Boolean? = null,
+    @JsonNames("raw") val raw: Boolean? = null,
+    @JsonNames("keep_alive") val keepAlive: String? = null
 )
 
 @Serializable
@@ -78,4 +40,65 @@ data class Options(
     val mirostatEta: Float? = null,
     val penalizeNewline: Boolean? = null,
     val stop: List<String>? = null
+)
+
+@Serializable
+@OptIn(ExperimentalSerializationApi::class)
+data class ChatRequest(
+    @JsonNames("model") val model: String,
+    @JsonNames("messages") val messages: List<Message>,
+    @JsonNames("tools") val tools: List<Tool>? = null,
+    @JsonNames("format") val format: String = "json",
+    @JsonNames("stream") val stream: Boolean = false,
+    @JsonNames("keep_alive") val keepAlive: String? = "5m",
+    @JsonNames("options") val options: Options? = null
+)
+
+@Serializable
+@OptIn(ExperimentalSerializationApi::class)
+data class Message(
+    @JsonNames("role") val role: String,
+    @JsonNames("content") val content: String,
+    @JsonNames("images") val images: List<ImageData>? = null,
+    @JsonNames("tool_calls") val toolCalls: List<ToolCall>? = null
+)
+
+typealias ImageData = ByteArray
+
+@Serializable
+data class ToolCall(
+    val function: ToolCallFunction
+)
+
+@Serializable
+data class ToolCallFunction(
+    val name: String,
+    val arguments: Map<String, @Contextual Any>
+)
+
+@Serializable
+data class Tool(
+    val type: String,
+    val function: ToolFunction
+)
+
+@Serializable
+data class ToolFunction(
+    val name: String,
+    val description: String,
+    val parameters: Parameters
+)
+
+@Serializable
+data class Parameters(
+    val type: String,
+    val required: List<String>,
+    val properties: Map<String, Property>
+)
+
+@Serializable
+data class Property(
+    val type: String,
+    val description: String,
+    val enum: List<String>? = null
 )
