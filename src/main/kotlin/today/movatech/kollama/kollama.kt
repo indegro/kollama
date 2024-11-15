@@ -6,6 +6,9 @@ import io.ktor.client.engine.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.utils.io.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 
 interface KollamaClient {
@@ -15,6 +18,8 @@ interface KollamaClient {
     suspend fun generate(generateRequest: GenerateRequest): GenerateResponse
 
     suspend fun chat(chatRequest: ChatRequest): ChatResponse
+
+    suspend fun create(createRequest: CreateRequest): Flow<ProgressResponse>
 
     fun shutdown()
 }
@@ -64,6 +69,24 @@ class KollamaClientImpl(
     override suspend fun chat(chatRequest: ChatRequest): ChatResponse {
         val response = sendRequestWithBody("$ollamaBaseEndpoint/chat", chatRequest)
         return processResponse(response)
+    }
+
+    override suspend fun create(createRequest: CreateRequest): Flow<ProgressResponse> {
+        val response = sendRequestWithBody("$ollamaBaseEndpoint/create", createRequest)
+
+        val channel = response.bodyAsChannel()
+        return flow {
+            while (!channel.isClosedForRead) {
+                channel
+                    .readUTF8Line()
+                    ?.let {
+                        it.decodeFromString<ProgressResponse>()
+                            .onSuccess { result ->
+                                emit(result)
+                            }
+                    }
+            }
+        }
     }
 
     override fun shutdown() {

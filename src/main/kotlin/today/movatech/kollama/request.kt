@@ -102,3 +102,22 @@ data class Property(
     val description: String,
     val enum: List<String>? = null
 )
+
+@Serializable
+@OptIn(ExperimentalSerializationApi::class)
+data class CreateRequest(
+    @JsonNames("model") val model: String,
+    @JsonNames("modelfile") val modelfile: String,
+    @JsonNames("stream") val stream: Boolean? = null,
+    @JsonNames("quantize") val quantize: String? = null,
+)
+
+@Serializable
+@OptIn(ExperimentalSerializationApi::class)
+data class ProgressResponse(
+    @JsonNames("status") val status: String,
+    @JsonNames("digest") val digest: String? = null,
+    @JsonNames("total") val total: Long? = null,
+    @JsonNames("completed") val completed: Long? = null
+)
+
