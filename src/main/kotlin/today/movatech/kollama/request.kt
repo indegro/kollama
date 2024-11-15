@@ -114,10 +114,11 @@ data class CreateRequest(
 
 @Serializable
 @OptIn(ExperimentalSerializationApi::class)
-data class ProgressResponse(
-    @JsonNames("status") val status: String,
-    @JsonNames("digest") val digest: String? = null,
-    @JsonNames("total") val total: Long? = null,
-    @JsonNames("completed") val completed: Long? = null
+data class PullRequest(
+    @JsonNames("model") val model: String,
+    @JsonNames("insecure") val insecure: Boolean? = null,
+    @JsonNames("username") val username: String? = null,
+    @JsonNames("password") val password: String? = null,
+    @JsonNames("stream") val stream: Boolean? = null,
 )
 

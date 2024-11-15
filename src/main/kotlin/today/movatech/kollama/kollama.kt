@@ -12,14 +12,15 @@ import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 
 interface KollamaClient {
-
-    suspend fun tags(): Models
-
     suspend fun generate(generateRequest: GenerateRequest): GenerateResponse
 
     suspend fun chat(chatRequest: ChatRequest): ChatResponse
 
     suspend fun create(createRequest: CreateRequest): Flow<ProgressResponse>
+
+    suspend fun tags(): Models
+
+    suspend fun pull(pullRequest: PullRequest): Flow<ProgressResponse>
 
     fun shutdown()
 }
@@ -73,14 +74,22 @@ class KollamaClientImpl(
 
     override suspend fun create(createRequest: CreateRequest): Flow<ProgressResponse> {
         val response = sendRequestWithBody("$ollamaBaseEndpoint/create", createRequest)
+        return processResponseFlow(response)
+    }
 
+    override suspend fun pull(pullRequest: PullRequest): Flow<ProgressResponse> {
+        val response = sendRequestWithBody("$ollamaBaseEndpoint/pull", pullRequest)
+        return processResponseFlow(response)
+    }
+
+    private suspend inline fun <reified ResponseType : Any> processResponseFlow(response: HttpResponse): Flow<ResponseType> {
         val channel = response.bodyAsChannel()
         return flow {
             while (!channel.isClosedForRead) {
                 channel
                     .readUTF8Line()
                     ?.let {
-                        it.decodeFromString<ProgressResponse>()
+                        it.decodeFromString<ResponseType>()
                             .onSuccess { result ->
                                 emit(result)
                             }

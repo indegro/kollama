@@ -61,3 +61,12 @@ data class Metrics(
     @JsonNames("eval_count") val evalCount: Int? = null,
     @JsonNames("eval_duration") val evalDuration: String? = null
 )
+
+@Serializable
+@OptIn(ExperimentalSerializationApi::class)
+data class ProgressResponse(
+    @JsonNames("status") val status: String,
+    @JsonNames("digest") val digest: String? = null,
+    @JsonNames("total") val total: Long? = null,
+    @JsonNames("completed") val completed: Long? = null
+)
