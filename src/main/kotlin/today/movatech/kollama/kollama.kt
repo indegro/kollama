@@ -10,6 +10,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
+import java.net.URI
 
 interface KollamaClient {
     suspend fun generate(generateRequest: GenerateRequest): GenerateResponse
@@ -38,6 +39,19 @@ class KollamaClientConfig private constructor(
         fun protocol(protocol: String) = apply { this.protocol = protocol }
         fun host(host: String) = apply { this.host = host }
         fun port(port: Int) = apply { this.port = port }
+
+        fun endpoint(endpoint: String): Builder {
+            val uri = try {
+                URI(endpoint)
+            } catch (e: Exception) {
+                URI("http://localhost:11434")
+            }
+
+            protocol = uri.scheme
+            host = uri.host
+            port = uri.port
+            return this
+        }
 
         fun build(): KollamaClientConfig {
             return KollamaClientConfig(protocol, host, port)
