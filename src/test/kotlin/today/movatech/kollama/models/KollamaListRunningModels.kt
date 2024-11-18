@@ -1,4 +1,4 @@
-package today.movatech.kollama
+package today.movatech.kollama.models
 
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
@@ -6,21 +6,24 @@ import io.ktor.http.content.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
+import today.movatech.kollama.KollamaClientImpl
+import today.movatech.kollama.KollamaTest
+import today.movatech.kollama.ProgressResponse
+import today.movatech.kollama.PullRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class KollamaCreate : KollamaTest() {
+class KollamaListRunningModels : KollamaTest() {
 
     @Test
-    fun test_create_model() {
+    fun test_list_running_models() {
         runBlocking {
             val mockEngine = MockEngine { request ->
-                require(request.url.encodedPath == "/api/create")
-                require(request.method.value == "POST")
-                require(request.body is TextContent)
+                require(request.url.encodedPath == "/api/ps")
+                require(request.method.value == "GET")
 
                 respond(
-                    content = ByteReadChannel(readResponse("data/create.jsonl")),
+                    content = ByteReadChannel(readResponse("data/ps.json")),
                     status = HttpStatusCode.OK,
                     headers = headersOf(HttpHeaders.ContentType, "application/json")
                 )
@@ -29,14 +32,12 @@ class KollamaCreate : KollamaTest() {
                 engine = mockEngine
             )
 
-            val createRequest = CreateRequest(
+            val pullRequest = PullRequest(
                 model = "model",
-                modelfile = "model_file"
             )
 
-            val createResponse = mutableListOf<ProgressResponse>()
-            kollamaClient.create(createRequest).toList(createResponse)
-            assertEquals(11, createResponse.size)
+            val runningModelsResponse = kollamaClient.ps()
+            assertEquals(1, runningModelsResponse.models.size)
         }
     }
 }

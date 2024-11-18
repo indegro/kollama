@@ -27,17 +27,18 @@ data class Model(
     @JsonNames("modified_at") val modifiedAt: String,
     @JsonNames("size") val size: Long,
     @JsonNames("digest") val digest: String,
-    @JsonNames("details") val details: ModelDetail
+    @JsonNames("details") val details: ModelDetails
 )
 
 @Serializable
 @OptIn(ExperimentalSerializationApi::class)
-data class ModelDetail(
+data class ModelDetails(
     @JsonNames("format") val format: String,
     @JsonNames("family") val family: String,
     @JsonNames("families") val families: List<String>? = emptyList(),
     @JsonNames("parameter_size") val parameterSize: String,
-    @JsonNames("quantization_level") val quantizationLevel: String
+    @JsonNames("quantization_level") val quantizationLevel: String,
+    @JsonNames("parent_model") val parentModel: String? = null
 )
 
 @Serializable
@@ -69,4 +70,22 @@ data class ProgressResponse(
     @JsonNames("digest") val digest: String? = null,
     @JsonNames("total") val total: Long? = null,
     @JsonNames("completed") val completed: Long? = null
+)
+
+@Serializable
+@OptIn(ExperimentalSerializationApi::class)
+data class ProcessResponse(
+    @JsonNames("models") val models: List<ProcessModelResponse>
+)
+
+@Serializable
+@OptIn(ExperimentalSerializationApi::class)
+data class ProcessModelResponse(
+    @JsonNames("name") val name: String,
+    @JsonNames("model") val model: String,
+    @JsonNames("size") val size: Long,
+    @JsonNames("digest") val digest: String,
+    @JsonNames("details") val details: ModelDetails? = null,
+    @JsonNames("expires_at") val expiresAt: String,
+    @JsonNames("size_vram") val sizeVRAM: Long
 )

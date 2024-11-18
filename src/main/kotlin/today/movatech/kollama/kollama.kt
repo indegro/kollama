@@ -23,6 +23,8 @@ interface KollamaClient {
 
     suspend fun pull(pullRequest: PullRequest): Flow<ProgressResponse>
 
+    suspend fun ps(): ProcessResponse
+
     fun shutdown()
 }
 
@@ -94,6 +96,13 @@ class KollamaClientImpl(
     override suspend fun pull(pullRequest: PullRequest): Flow<ProgressResponse> {
         val response = sendRequestWithBody("$ollamaBaseEndpoint/pull", pullRequest)
         return processResponseFlow(response)
+    }
+
+    override suspend fun ps(): ProcessResponse {
+        val response: HttpResponse = client.get("$ollamaBaseEndpoint/ps") {
+            contentType(ContentType.Application.Json)
+        }
+        return processResponse(response)
     }
 
     private suspend inline fun <reified ResponseType : Any> processResponseFlow(response: HttpResponse): Flow<ResponseType> {
