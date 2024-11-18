@@ -25,6 +25,10 @@ interface KollamaClient {
 
     suspend fun ps(): ProcessResponse
 
+    suspend fun stop(model: String): GenerateResponse
+
+    suspend fun load(model: String): GenerateResponse
+
     fun shutdown()
 }
 
@@ -104,6 +108,10 @@ class KollamaClientImpl(
         }
         return processResponse(response)
     }
+
+    override suspend fun stop(model: String) = generate(GenerateRequest(keepAlive = 0, model = model))
+
+    override suspend fun load(model: String) = generate(GenerateRequest(model = model))
 
     private suspend inline fun <reified ResponseType : Any> processResponseFlow(response: HttpResponse): Flow<ResponseType> {
         val channel = response.bodyAsChannel()

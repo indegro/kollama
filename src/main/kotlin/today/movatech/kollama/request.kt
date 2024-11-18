@@ -2,22 +2,21 @@ package today.movatech.kollama
 
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonNames
 
 @Serializable
-@OptIn(ExperimentalSerializationApi::class)
 data class GenerateRequest(
-    @JsonNames("model") val model: String,
-    @JsonNames("prompt") val prompt: String,
-    @JsonNames("suffix") val suffix: String? = null,
-    @JsonNames("format") val format: String? = null,
-    @JsonNames("options") val options: Options? = null,
-    @JsonNames("system") val system: String? = null,
-    @JsonNames("template") val template: String? = null,
-    @JsonNames("stream") val stream: Boolean? = null,
-    @JsonNames("raw") val raw: Boolean? = null,
-    @JsonNames("keep_alive") val keepAlive: String? = null
+    @SerialName("model") val model: String,
+    @SerialName("prompt") val prompt: String? = null,
+    @SerialName("suffix") val suffix: String? = null,
+    @SerialName("format") val format: String? = null,
+    @SerialName("options") val options: Options? = null,
+    @SerialName("system") val system: String? = null,
+    @SerialName("template") val template: String? = null,
+    @SerialName("stream") val stream: Boolean? = null,
+    @SerialName("raw") val raw: Boolean? = null,
+    @SerialName("keep_alive") val keepAlive: Int? = null
 )
 
 @Serializable
@@ -43,24 +42,22 @@ data class Options(
 )
 
 @Serializable
-@OptIn(ExperimentalSerializationApi::class)
 data class ChatRequest(
-    @JsonNames("model") val model: String,
-    @JsonNames("messages") val messages: List<Message>,
-    @JsonNames("tools") val tools: List<Tool>? = null,
-    @JsonNames("format") val format: String = "json",
-    @JsonNames("stream") val stream: Boolean = false,
-    @JsonNames("keep_alive") val keepAlive: String? = "5m",
-    @JsonNames("options") val options: Options? = null
+    @SerialName("model") val model: String,
+    @SerialName("messages") val messages: List<Message>,
+    @SerialName("tools") val tools: List<Tool>? = null,
+    @SerialName("format") val format: String = "json",
+    @SerialName("stream") val stream: Boolean = false,
+    @SerialName("keep_alive") val keepAlive: String? = "5m",
+    @SerialName("options") val options: Options? = null
 )
 
 @Serializable
-@OptIn(ExperimentalSerializationApi::class)
 data class Message(
-    @JsonNames("role") val role: String,
-    @JsonNames("content") val content: String,
-    @JsonNames("images") val images: List<ImageData>? = null,
-    @JsonNames("tool_calls") val toolCalls: List<ToolCall>? = null
+    @SerialName("role") val role: String,
+    @SerialName("content") val content: String,
+    @SerialName("images") val images: List<ImageData>? = null,
+    @SerialName("tool_calls") val toolCalls: List<ToolCall>? = null
 )
 
 typealias ImageData = ByteArray
@@ -104,21 +101,19 @@ data class Property(
 )
 
 @Serializable
-@OptIn(ExperimentalSerializationApi::class)
 data class CreateRequest(
-    @JsonNames("model") val model: String,
-    @JsonNames("modelfile") val modelfile: String,
-    @JsonNames("stream") val stream: Boolean? = null,
-    @JsonNames("quantize") val quantize: String? = null,
+    @SerialName("model") val model: String,
+    @SerialName("modelfile") val modelfile: String,
+    @SerialName("stream") val stream: Boolean? = null,
+    @SerialName("quantize") val quantize: String? = null,
 )
 
 @Serializable
-@OptIn(ExperimentalSerializationApi::class)
 data class PullRequest(
-    @JsonNames("model") val model: String,
-    @JsonNames("insecure") val insecure: Boolean? = null,
-    @JsonNames("username") val username: String? = null,
-    @JsonNames("password") val password: String? = null,
-    @JsonNames("stream") val stream: Boolean? = null,
+    @SerialName("model") val model: String,
+    @SerialName("insecure") val insecure: Boolean? = null,
+    @SerialName("username") val username: String? = null,
+    @SerialName("password") val password: String? = null,
+    @SerialName("stream") val stream: Boolean? = null,
 )
 
